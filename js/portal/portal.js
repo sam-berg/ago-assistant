@@ -133,6 +133,35 @@ define(["jquery", "util"], function (jquery, util) {
                     dataType: "json"
                 });
             },
+            updateWebmapDataAndDescription: function (portal, username, folder, id, data, description,token) {
+              // Update the content in a web map.
+
+
+              // Clean up description items for posting.
+              // This is necessary because some of the item descriptions (e.g. tags and extent)
+              // are returned as arrays, but the post operation expects comma separated strings.
+              jquery.each(description, function (item, value) {
+                if (value === null) {
+                  description[item] = "";
+                } else if (value instanceof Array) {
+                  description[item] = util.arrayToString(value);
+                }
+              });
+
+              var o = {
+                type: "POST",
+                url: portal + "sharing/rest/content/users/" + username + "/" + folder + "/items/" + id + "/update?",
+                data: {
+                  text: JSON.stringify(data), // Stringify the Javascript object so it can be properly sent.
+                  token: token,
+                  f: "json"
+                },
+                dataType: "json"
+              };
+              jquery.extend(o.data, description);
+
+              return jquery.ajax(o);
+            },
             updateWebmapData: function (portal, username, folder, id, data, token) {
                 // Update the content in a web map.
                 return jquery.ajax({
@@ -140,7 +169,7 @@ define(["jquery", "util"], function (jquery, util) {
                     url: portal + "sharing/rest/content/users/" + username + "/" + folder + "/items/" + id + "/update?",
                     data: {
                         text: JSON.stringify(data), // Stringify the Javascript object so it can be properly sent.
-                        token: token,
+                        token: token,            
                         f: "json"
                     },
                     dataType: "json"

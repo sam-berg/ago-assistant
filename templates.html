@@ -122,6 +122,49 @@
 
 </script>
 
+<script type="text/template" id="editTemplate">
+  
+ 
+    
+    <div class="panel panel-primary">
+          
+        <div class="panel-heading">
+            <h2 class="panel-title">{{ title }}</h2>
+        </div>
+
+  <div class="panel-body" id="Div1" contenteditable="true">
+
+    
+
+            <ul class="list-group">
+                <li class="list-group-item">Description</li>
+                <li class="list-group-item" id="myDescription" description-original="{{ description }}"><pre>{{ description }}</pre></li>
+            </ul>
+            {{ #data }}
+                <br>
+                <ul class="list-group">
+                    <li class="list-group-item">Data</li>
+                    <li class="list-group-item" id="myData" data-original="{{ data }}"><pre>{{ data }}</pre></li>
+                </ul>
+            {{ /data }}
+            {{ ^data }}
+                <br>
+                <ul class="list-group">
+                    <li class="list-group-item">Data</li>
+                    <li class="list-group-item">There is no data associated with this item or it is a file item which will not be displayed here.</li>
+                </ul>
+            {{ /data }}
+        </div>
+
+                   <div class="pull-right">
+                    <button type="submit" class="btn" id="btnWebMapJSONReset">Reset</button>
+                    <button type="submit" class="btn btn-primary" id="btnWebMapJSONUpdate">Update</button>
+                </div>
+    </div>
+
+</script>
+
+
 <script type="text/template" id="inspectTemplate">
     
     <div class="panel panel-primary">

@@ -155,6 +155,13 @@ require([
         updateWebmapServices();
     });
 
+  // Add a listener for the "Update Webmap JSON" action.
+    jquery("li[data-action='updateWebmapJSON']").click(function () {
+      cleanUp();
+      jquery("#currentAction").html("<a>update item JSON directly</a>");
+      updateWebmapJSON();
+    });
+
     // Add a listener for the "Update map services" action.
     jquery("li[data-action='updateContentUrl']").click(function () {
         cleanUp();
@@ -342,6 +349,94 @@ require([
         });
     }
 
+    function updateWebmapJSON() {
+
+      var webmapData, // make a couple globals so we can access them in other parts of the function
+    folder;
+      var itemDescription,
+           itemData;
+      jquery(".content").addClass("data-toggle");
+      jquery(".content").removeClass("disabled");
+      jquery(".content").attr("data-toggle", "button");
+      jquery(".content").addClass("btn-info"); // Highlight everything
+
+      jquery("#inspectModal").modal("hide");
+      jquery("#inspectBtn").button("reset");
+
+      jquery(".content").click(function () {
+       
+        NProgress.start();
+        jquery(".content").removeClass("active");
+        jquery(".content").removeClass("btn-primary");
+        jquery(this).addClass("btn-primary");
+        var itemDescription;
+        var itemData;
+
+        var id = jquery(this).attr("data-id"),
+            title = jquery(this).text();
+        portal.content.itemDescription(sessionStorage.sourceUrl, id, sessionStorage.sourceToken).done(function (description) {
+          itemDescription = JSON.stringify(description, undefined, 2);
+          portal.content.itemData(sessionStorage.sourceUrl, id, sessionStorage.sourceToken).done(function (data) {
+            itemData = data;
+          }).always(function (data) {
+            var templateData = {
+              title: title,
+              description: itemDescription,
+              data: JSON.stringify(itemData, undefined, 2)
+            };
+            var html = mustache.to_html(jquery("#editTemplate").html(), templateData);
+            // Add the HTML container with the item JSON.
+            jquery("#dropArea").html(html);
+            // Color code the JSON to make it easier to read (uses highlight.js).
+            jquery("pre").each(function (i, e) {
+              hljs.highlightBlock(e);
+            });
+            NProgress.done();
+          });
+        });
+      });
+
+
+
+      jquery(document).on("click", "#btnWebMapJSONReset", (function () {
+        alert("btnWebMapJSONReset");
+      }));
+
+      jquery(document).on("click", "#btnWebMapJSONUpdate", (function () {
+
+        var myData = jquery("[data-original]");
+        var myDescription = jquery("[description-original]");
+
+        var yourData = jQuery("#myData");
+        var yourDescription = jQuery("#myDescription");
+
+        var webmapId = jquery(".content.active.btn-primary").attr("data-id"),
+               folder = jquery(".content.active.btn-primary").parent().attr("data-folder")
+
+        var itemData = null;
+        if(yourData.length>0)
+          itemData = JSON.parse(yourData[0].innerText);//JSON.parse(webmapData);
+
+        var itemDescription = null;
+        if(yourDescription.length>0)
+          itemDescription = JSON.parse(yourDescription[0].innerText);
+
+        portal.content.updateWebmapDataAndDescription(sessionStorage.sourceUrl, sessionStorage.sourceUsername, folder, webmapId, itemData,itemDescription, sessionStorage.sourceToken).done(function (response) {
+          var html;
+          if (response.success) {
+            html = mustache.to_html(jquery("#updateSuccessTemplate").html());
+            jquery("#btnWebMapJSONUpdate").before(html);
+          } else if (response.error.code === 400) {
+            jquery("#btnWebMapJSONReset").click(); // Reset the displayed URLs to their original values.
+            html = mustache.to_html(jquery("#updateErrorTemplate").html(), response);
+            jquery("#btnWebMapJSONUpdate").before(html);
+          }
+        });
+
+
+      }));
+    }
+
     function updateWebmapServices() {
         var webmapData, // make a couple globals so we can access them in other parts of the function
             folder;
@@ -388,6 +483,7 @@ require([
             });
         });
 
+
         jquery(document).on("click", "#btnUpdateWebmapServices", (function () {
             var webmapServices = jquery("[data-original]");
             jquery.each(webmapServices, function (service) {
@@ -411,6 +507,7 @@ require([
                     jquery("#btnResetWebmapServices").before(html);
                 }
             });
+
         }));
 
         jquery(document).on("click", "#btnResetWebmapServices", (function () {
@@ -422,6 +519,8 @@ require([
                 jquery(webmapServices[service]).attr("data-original", currentUrl);
             });
         }));
+
+
 
     }
 
