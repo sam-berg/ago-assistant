@@ -158,7 +158,7 @@ require([
   // Add a listener for the "Update Webmap JSON" action.
     jquery("li[data-action='updateWebmapJSON']").click(function () {
       cleanUp();
-      jquery("#currentAction").html("<a>update web map JSON </a>");
+      jquery("#currentAction").html("<a>update item JSON directly</a>");
       updateWebmapJSON();
     });
 
